@@ -1,0 +1,36 @@
+{
+  "name": "treemap-multilevel",
+  "version": "0.0.2",
+  "description": "Multilevel treemap component created with D3 and React",
+  "main": "index.js",
+  "scripts": {
+    "build": "neutrino build",
+    "start": "neutrino start",
+    "lint": "neutrino lint",
+    "test": "neutrino test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stil/treemap-multilevel.git"
+  },
+  "keywords": [
+    "treemap",
+    "d3",
+    "react"
+  ],
+  "author": "Przemysław Ryciuk <p@ryciuk.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stil/treemap-multilevel/issues"
+  },
+  "homepage": "https://github.com/stil/treemap-multilevel#readme",
+  "devDependencies": {
+    "@neutrinojs/airbnb": "^8.3.0",
+    "@neutrinojs/jest": "^8.3.0",
+    "@neutrinojs/react-components": "^8.3.0",
+    "neutrino": "^8.3.0",
+    "prop-types": "^15.6.2",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
+  }
+}
