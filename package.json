@@ -1,6 +1,6 @@
 {
   "name": "treemap-multilevel",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Multilevel treemap component created with D3 and React",
   "main": "index.js",
   "scripts": {

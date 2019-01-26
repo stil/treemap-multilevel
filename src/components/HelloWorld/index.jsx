@@ -9,15 +9,15 @@ const generateColor = () => `#${
 
 export default class HelloWorld extends PureComponent {
   static defaultProps = {
-    initialColor: '#000'
+    initialColor: '#000',
   };
 
   static propTypes = {
-    initialColor: string
+    initialColor: string,
   };
 
   state = {
-    color: this.props.initialColor
+    color: this.props.initialColor,
   };
 
   componentWillReceiveProps({ initialColor }) {
@@ -28,7 +28,7 @@ export default class HelloWorld extends PureComponent {
 
   handleClick = () => {
     this.setState({
-      color: generateColor()
+      color: generateColor(),
     });
   };
 
