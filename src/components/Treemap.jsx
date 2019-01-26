@@ -1,8 +1,8 @@
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-param-reassign */
 import React from 'react';
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
 import { treemap } from 'd3-hierarchy';
+import chroma from 'chroma-js';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
 import './Treemap.css';
@@ -25,7 +25,7 @@ function calculatePos(node) {
   };
 }
 
-export default function Treemap({ root, width, height }) {
+export default function Treemap({ root, width, height, labelGetter }) {
   root
     .sum(d => d.value)
     .sort((a, b) => b.height - a.height || b.value - a.value);
@@ -34,9 +34,8 @@ export default function Treemap({ root, width, height }) {
 
   const paddingTop = 20;
 
-  for (let i = 0; i < 4; i++) {
-    root.descendants().filter(desc => desc.depth > i).forEach((desc) => {
-      const relativeRoot = desc.ancestors().find(parent => parent.depth === i);
+  root.descendants().forEach((relativeRoot) => {
+    relativeRoot.descendants().slice(1).forEach((desc) => {
       let referencePoint;
       let scale;
 
@@ -64,30 +63,37 @@ export default function Treemap({ root, width, height }) {
       desc.x0 = referencePoint + scale * (desc.x0 - referencePoint);
       desc.x1 = referencePoint + scale * (desc.x1 - referencePoint);
     });
-  }
+  });
 
   const colorScale = scaleOrdinal(schemeCategory10);
 
   return (
     <div>
-      <div style={{ width: `${width}px`, background: '#f0f0f0', margin: 'auto', marginBottom: '16px' }}>
-        {root.ancestors().map(item => item.data.key).join(' - ')}
-      </div>
       <div style={{ width: `${width}px`, height: `${height}px`, margin: 'auto', overflow: 'hidden' }}>
         {root.descendants()
             .filter(item => canDisplay(item))
             .map((item, i) => (
               <div
                 key={item.data.key + item.depth}
-                className="Treemap-node"
+                className="treemap__node"
                 style={{
               ...calculatePos(item, root),
-              background: colorScale(i),
+              background: chroma(colorScale(i)).desaturate().brighten().hex(),
             }}
               >
-                <div className="Treemap-node-inner">
-                  <div className="Treemap-node-inner2">
-                    <div style={{ height: `${paddingTop - 2}px`, lineHeight: `${0.875 * (paddingTop - 2)}px`, backgroundColor: item.children ? 'rgba(255,255,255,0.3)' : null }}>{item.data.key}</div>
+                <div className="treemap__node-inner">
+                  <div className="treemap__node-inner2">
+                    <div style={{
+                      height: `${paddingTop}px`,
+                      lineHeight: `${paddingTop - 2}px`,
+                      backgroundColor: item.children ? 'rgba(255,255,255,0.3)' : null,
+                      fontSize: '12px',
+                      paddingLeft: '4px',
+                      color: chroma(colorScale(i)).darken(2).hex(),
+                   }}
+                    >
+                      {labelGetter(item)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -101,4 +107,9 @@ Treemap.propTypes = {
   root: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  labelGetter: PropTypes.func,
+};
+
+Treemap.defaultProps = {
+  labelGetter: node => node.data.key,
 };
