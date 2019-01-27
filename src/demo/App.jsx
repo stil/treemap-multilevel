@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Fragment } from 'react';
 import chroma from 'chroma-js';
 import { scaleOrdinal } from 'd3-scale';
@@ -25,6 +26,25 @@ function nFormatter(num, digits) {
   return (num / si[i].value).toFixed(digits).replace(rx, '$1') + si[i].symbol;
 }
 
+const colorScale = scaleOrdinal(schemeCategory10);
+
+
+const cachedBgColors = new Map();
+function cacheBgColor(i) {
+  if (cachedBgColors.has(i)) return cachedBgColors.get(i);
+  const color = chroma(colorScale(i)).desaturate().brighten().hex();
+  cachedBgColors.set(i, color);
+  return color;
+}
+
+const cachedTextColors = new Map();
+function cacheTextColor(i) {
+  if (cachedTextColors.has(i)) return cachedTextColors.get(i);
+  const color = chroma(colorScale(i)).darken(2).hex();
+  cachedTextColors.set(i, color);
+  return color;
+}
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -37,7 +57,6 @@ export default class App extends React.Component {
   }
 
   render() {
-    const colorScale = scaleOrdinal(schemeCategory10);
     const padding = [20, 2, 2, 2];
     const size = [800, 800];
 
@@ -57,13 +76,13 @@ export default class App extends React.Component {
                 .ancestors()
                 .reverse()
                 .map((node, i) => (
-                  <Fragment>
+                  <Fragment key={node.data.key}>
                     {i > 0 ? ' - ' : ''}<a href="#" onClick={(e) => { e.preventDefault(); this.handleClick(node); }}>{node.data.key}</a>
                   </Fragment>
                 ))}
           </div>
 
-          <div style={{ height: `${size[1]}px` }}>
+          <div style={{ height: `${size[1]}px`, position: 'relative', overflow: 'hidden', borderRadius: '2px', backgroundClip: 'padding-box' }}>
             <Treemap
               root={countryTree}
               zoomed={this.state.zoomed}
@@ -75,7 +94,7 @@ export default class App extends React.Component {
                   className="treemap__node"
                   style={{
                     ...posStyle,
-                    background: chroma(colorScale(i)).desaturate().brighten().hex(),
+                    background: cacheBgColor(countryTree.descendants().findIndex(item => item.data.key === node.data.key)),
                   }}
                   onClick={() => { if (node.children) this.handleClick(node); }}
                 >
@@ -87,7 +106,7 @@ export default class App extends React.Component {
                           height: `${padding[0]}px`,
                           lineHeight: `${padding[0] - 2}px`,
                           backgroundColor: node.children ? 'rgba(255,255,255,0.3)' : null,
-                          color: chroma(colorScale(i)).darken(2).hex(),
+                          color: cacheTextColor(countryTree.descendants().findIndex(item => item.data.key === node.data.key)),
                         }}
                       >
                         {node.data.key} ({nFormatter(node.value)})

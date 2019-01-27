@@ -18,6 +18,7 @@ function calculatePos(node) {
     transform: `translate(${node.x0}px, ${node.y0}px)`,
     width: `${node.x1 - node.x0}px`,
     height: `${node.y1 - node.y0}px`,
+    transition: 'all 1s ease',
   };
 }
 
@@ -42,42 +43,44 @@ export default function Treemap({ root, zoomed, width, height, padding, nodeComp
     });
   }
 
-  zoomedEl.descendants().forEach((relativeRoot) => {
-    relativeRoot.descendants().slice(1).forEach((desc) => {
-      let refPoint;
-      let scale;
+  root.descendants()
+    .filter(node => node.depth >= zoomedEl.depth)
+    .forEach((relativeRoot) => {
+      relativeRoot.descendants().slice(1).forEach((node) => {
+        let refPoint;
+        let scale;
 
-      // Scale vertically to bottom.
-      scale = 1 - padding[0] / (relativeRoot.y1 - relativeRoot.y0);
-      refPoint = relativeRoot.y1;
-      desc.y0 = refPoint + scale * (desc.y0 - refPoint);
-      desc.y1 = refPoint + scale * (desc.y1 - refPoint);
+        // Scale vertically to bottom.
+        scale = 1 - padding[0] / (relativeRoot.y1 - relativeRoot.y0);
+        refPoint = relativeRoot.y1;
+        node.y0 = refPoint + scale * (node.y0 - refPoint);
+        node.y1 = refPoint + scale * (node.y1 - refPoint);
 
-      // Scale vertically to top.
-      scale = 1 - padding[2] / (relativeRoot.y1 - relativeRoot.y0);
-      refPoint = relativeRoot.y0;
-      desc.y0 = refPoint + scale * (desc.y0 - refPoint);
-      desc.y1 = refPoint + scale * (desc.y1 - refPoint);
+        // Scale vertically to top.
+        scale = 1 - padding[2] / (relativeRoot.y1 - relativeRoot.y0);
+        refPoint = relativeRoot.y0;
+        node.y0 = refPoint + scale * (node.y0 - refPoint);
+        node.y1 = refPoint + scale * (node.y1 - refPoint);
 
-      // Scale horizontally to left.
-      scale = 1 - padding[1] / (relativeRoot.x1 - relativeRoot.x0);
-      refPoint = relativeRoot.x0;
-      desc.x0 = refPoint + scale * (desc.x0 - refPoint);
-      desc.x1 = refPoint + scale * (desc.x1 - refPoint);
+        // Scale horizontally to left.
+        scale = 1 - padding[1] / (relativeRoot.x1 - relativeRoot.x0);
+        refPoint = relativeRoot.x0;
+        node.x0 = refPoint + scale * (node.x0 - refPoint);
+        node.x1 = refPoint + scale * (node.x1 - refPoint);
 
-      // Scale horizontally to right.
-      scale = 1 - padding[3] / (relativeRoot.x1 - relativeRoot.x0);
-      refPoint = relativeRoot.x1;
-      desc.x0 = refPoint + scale * (desc.x0 - refPoint);
-      desc.x1 = refPoint + scale * (desc.x1 - refPoint);
+        // Scale horizontally to right.
+        scale = 1 - padding[3] / (relativeRoot.x1 - relativeRoot.x0);
+        refPoint = relativeRoot.x1;
+        node.x0 = refPoint + scale * (node.x0 - refPoint);
+        node.x1 = refPoint + scale * (node.x1 - refPoint);
+      });
     });
-  });
 
-  return zoomedEl.descendants()
+  return root.descendants()
     .filter(node => canDisplay(node))
     .map((node, i) => (
       <Fragment key={node.data.key + node.depth}>
-        {nodeComponent(node, i, calculatePos(node, root))}
+        {nodeComponent(node, i, calculatePos(node))}
       </Fragment>
     ));
 }
