@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
-import React from 'react';
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+import React, { Fragment } from 'react';
 import chroma from 'chroma-js';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
@@ -26,7 +28,12 @@ function nFormatter(num, digits) {
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { zoomed: null };
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(node) {
+    this.setState({ zoomed: node.depth === 0 ? null : node.data.key });
   }
 
   render() {
@@ -40,39 +47,57 @@ export default class App extends React.Component {
           {"@import url('https://fonts.googleapis.com/css?family=Roboto');"}
         </style>
 
+        <div style={{ width: `${size[0]}px`, margin: 'auto' }}>
+          <div style={{ margin: '12px 8px' }}>
+            {this.state.zoomed === null
+              ? 'No element zoomed'
+              : countryTree
+                .descendants()
+                .find(node => node.data.key === this.state.zoomed)
+                .ancestors()
+                .reverse()
+                .map((node, i) => (
+                  <Fragment>
+                    {i > 0 ? ' - ' : ''}<a href="#" onClick={(e) => { e.preventDefault(); this.handleClick(node); }}>{node.data.key}</a>
+                  </Fragment>
+                ))}
+          </div>
 
-        <div style={{ width: `${size[0]}px`, height: `${size[1]}px`, margin: 'auto', overflow: 'hidden' }}>
-          <Treemap
-            root={countryTree}
-            width={size[0]}
-            height={size[1]}
-            padding={padding}
-            nodeComponent={(node, i, posStyle) => (
-              <div
-                className="treemap__node"
-                style={{
-                  ...posStyle,
-                  background: chroma(colorScale(i)).desaturate().brighten().hex(),
-                }}
-              >
-                <div className="treemap__node-outer">
-                  <div className="treemap__node-inner">
-                    <div
-                      className="treemap__label"
-                      style={{
-                        height: `${padding[0]}px`,
-                        lineHeight: `${padding[0] - 2}px`,
-                        backgroundColor: node.children ? 'rgba(255,255,255,0.3)' : null,
-                        color: chroma(colorScale(i)).darken(2).hex(),
-                      }}
-                    >
-                      {node.data.key} ({nFormatter(node.value)})
+          <div style={{ height: `${size[1]}px` }}>
+            <Treemap
+              root={countryTree}
+              zoomed={this.state.zoomed}
+              width={size[0]}
+              height={size[1]}
+              padding={padding}
+              nodeComponent={(node, i, posStyle) => (
+                <div
+                  className="treemap__node"
+                  style={{
+                    ...posStyle,
+                    background: chroma(colorScale(i)).desaturate().brighten().hex(),
+                  }}
+                  onClick={() => { if (node.children) this.handleClick(node); }}
+                >
+                  <div className={`treemap__node-outer${node.children ? ' treemap__node-outer--children' : ''}`}>
+                    <div className="treemap__node-inner">
+                      <div
+                        className="treemap__label"
+                        style={{
+                          height: `${padding[0]}px`,
+                          lineHeight: `${padding[0] - 2}px`,
+                          backgroundColor: node.children ? 'rgba(255,255,255,0.3)' : null,
+                          color: chroma(colorScale(i)).darken(2).hex(),
+                        }}
+                      >
+                        {node.data.key} ({nFormatter(node.value)})
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-          />
+              )}
+            />
+          </div>
         </div>
       </div>
     );

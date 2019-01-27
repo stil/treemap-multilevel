@@ -1,6 +1,9 @@
 .treemap__node {
     position: absolute;
     border-radius: 2px;
+    transition-duration: .3s;
+    transition-timing-function: ease;
+    transition-property: translate;
 }
 
 .treemap__node-outer {
@@ -11,6 +14,11 @@
     border-style: solid;
     border-color: rgba(0,0,0,0.1) rgba(0,0,0,0.4) rgba(0,0,0,0.4) rgba(0,0,0,0.1);
     border-radius: 2px;
+}
+
+.treemap__node-outer--children:hover {
+    background-color: rgba(255,255,255,0.15);
+    cursor: pointer;
 }
 
 .treemap__node-inner {
@@ -30,3 +38,15 @@
     padding-left: 4px;
     white-space: nowrap;
 }
+
+a {
+    color: #007bff;
+    text-decoration: none;
+    background-color: transparent;
+  }
+  
+  a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+  

@@ -21,14 +21,28 @@ function calculatePos(node) {
   };
 }
 
-export default function Treemap({ root, width, height, padding, nodeComponent }) {
+export default function Treemap({ root, zoomed, width, height, padding, nodeComponent }) {
   root
     .sum(d => d.value)
     .sort((a, b) => b.height - a.height || b.value - a.value);
 
   treemap().size([width, height])(root);
 
-  root.descendants().forEach((relativeRoot) => {
+  const zoomedEl = zoomed ? root.descendants().find(node => node.data.key === zoomed) : root;
+  if (zoomedEl.depth > 0) {
+    const scaleX = (root.x1 - root.x0) / (zoomedEl.x1 - zoomedEl.x0);
+    const scaleY = (root.y1 - root.y0) / (zoomedEl.y1 - zoomedEl.y0);
+    const refPointY = zoomedEl.y0;
+    const refPointX = zoomedEl.x0;
+    root.descendants().forEach((node) => {
+      node.y0 = scaleY * (node.y0 - refPointY);
+      node.y1 = scaleY * (node.y1 - refPointY);
+      node.x0 = scaleX * (node.x0 - refPointX);
+      node.x1 = scaleX * (node.x1 - refPointX);
+    });
+  }
+
+  zoomedEl.descendants().forEach((relativeRoot) => {
     relativeRoot.descendants().slice(1).forEach((desc) => {
       let refPoint;
       let scale;
@@ -59,7 +73,7 @@ export default function Treemap({ root, width, height, padding, nodeComponent })
     });
   });
 
-  return root.descendants()
+  return zoomedEl.descendants()
     .filter(node => canDisplay(node))
     .map((node, i) => (
       <Fragment key={node.data.key + node.depth}>
@@ -74,9 +88,11 @@ Treemap.propTypes = {
   height: PropTypes.number.isRequired,
   padding: PropTypes.arrayOf(PropTypes.number),
   nodeComponent: PropTypes.func,
+  zoomed: PropTypes.string,
 };
 
 Treemap.defaultProps = {
+  zoomed: null,
   nodeComponent: (node, i, posStyle) => <div style={{ ...posStyle, position: 'absolute', background: 'rgba(255,0,0,0.1)' }}>{node.data.key}</div>,
   padding: [20, 2, 2, 2],
 };
