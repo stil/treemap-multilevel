@@ -9,7 +9,7 @@ Example
 
 This is how components looks like displaying world countries populations on treemap.
 
-![screenshot](src/demo/demo.png)
+![screenshot](src/demo/demo.gif)
 
 How to use
 ----------

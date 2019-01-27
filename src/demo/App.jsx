@@ -28,23 +28,12 @@ function nFormatter(num, digits) {
 }
 
 const colorScale = scaleOrdinal(schemeCategory10);
-
-
-const cachedBgColors = new Map();
-function cacheBgColor(i) {
-  if (cachedBgColors.has(i)) return cachedBgColors.get(i);
-  const color = chroma(colorScale(i)).desaturate().brighten().hex();
-  cachedBgColors.set(i, color);
-  return color;
-}
-
-const cachedTextColors = new Map();
-function cacheTextColor(i) {
-  if (cachedTextColors.has(i)) return cachedTextColors.get(i);
-  const color = chroma(colorScale(i)).darken(2).hex();
-  cachedTextColors.set(i, color);
-  return color;
-}
+const bgColorsMap = new Map();
+const textColorsMap = new Map();
+countryTree.descendants().forEach((node, i) => {
+  bgColorsMap.set(node.data.key, chroma(colorScale(i)).desaturate().brighten().hex());
+  textColorsMap.set(node.data.key, chroma(colorScale(i)).darken(2).hex());
+});
 
 export default class App extends React.Component {
   constructor(props) {
@@ -104,7 +93,7 @@ export default class App extends React.Component {
                   className="treemap__node"
                   style={{
                     ...posStyle,
-                    background: cacheBgColor(countryTree.descendants().findIndex(item => item.data.key === node.data.key)),
+                    background: bgColorsMap.get(node.data.key),
                   }}
                 >
                   <div
@@ -112,7 +101,7 @@ export default class App extends React.Component {
                     onClick={() => { if (node.children) this.handleClick(node); }}
                     style={{
                           lineHeight: `${padding[0] - 2}px`,
-                          color: cacheTextColor(countryTree.descendants().findIndex(item => item.data.key === node.data.key)),
+                          color: textColorsMap.get(node.data.key),
                         }}
                   >
                     {node.data.key} ({nFormatter(node.value)})
