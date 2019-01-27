@@ -14,10 +14,12 @@ function canDisplay(node) {
 }
 
 function calculatePos(node, transition) {
+  const w = node.originalPos.x1 - node.originalPos.x0;
+  const h = node.originalPos.y1 - node.originalPos.y0;
   return {
-    transform: `translate(${node.x0}px, ${node.y0}px)`,
-    width: `${node.x1 - node.x0}px`,
-    height: `${node.y1 - node.y0}px`,
+    transform: `translate(${node.x0}px, ${node.y0}px) scale(${(node.x1 - node.x0) / w}, ${(node.y1 - node.y0) / h})`,
+    width: `${w}px`,
+    height: `${h}px`,
     transition,
   };
 }
@@ -32,6 +34,10 @@ export default function Treemap({
   treemap()
     .tile(tile)
     .size([width, height])(root);
+
+  root.descendants().forEach((node) => {
+    node.originalPos = { x0: node.x0, x1: node.x1, y0: node.y0, y1: node.y1 };
+  });
 
   const zoomedEl = zoomed ? root.descendants().find(node => node.data.key === zoomed) : root;
   if (zoomedEl.depth > 0) {

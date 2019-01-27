@@ -79,7 +79,7 @@ export default class App extends React.Component {
                 ))}
           </div>
 
-          <div style={{ height: `${size[1]}px`, position: 'relative', overflow: 'hidden', borderRadius: '2px', backgroundClip: 'padding-box' }}>
+          <div style={{ height: `${size[1]}px`, position: 'relative', overflow: 'hidden' /* borderRadius: '2px', backgroundClip: 'padding-box' */ }}>
             <Treemap
               tile={treemapBinary}
               root={countryTree}
@@ -104,7 +104,9 @@ export default class App extends React.Component {
                           color: textColorsMap.get(node.data.key),
                         }}
                   >
-                    {node.data.key} ({nFormatter(node.value)})
+                    <div style={{ transition: 'all 300ms ease', transformOrigin: 'top left', transform: `scale(${((node.originalPos.x1 - node.originalPos.x0) / (node.x1 - node.x0))}, ${((node.originalPos.y1 - node.originalPos.y0) / (node.y1 - node.y0))})` }}>
+                      {node.data.key} ({nFormatter(node.value)})
+                    </div>
                   </div>
                 </div>
               )}
