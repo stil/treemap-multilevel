@@ -23,7 +23,6 @@ function nFormatter(num, digits) {
   return (num / si[i].value).toFixed(digits).replace(rx, '$1') + si[i].symbol;
 }
 
-
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -56,23 +55,23 @@ export default class App extends React.Component {
                   background: chroma(colorScale(i)).desaturate().brighten().hex(),
                 }}
               >
-                <div className="treemap__node-inner">
-                  <div className="treemap__node-inner2">
-                    <div style={{
-                      height: `${padding[0]}px`,
-                      lineHeight: `${padding[0] - 2}px`,
-                      backgroundColor: node.children ? 'rgba(255,255,255,0.3)' : null,
-                      fontSize: '12px',
-                      paddingLeft: '4px',
-                      color: chroma(colorScale(i)).darken(2).hex(),
-                   }}
+                <div className="treemap__node-outer">
+                  <div className="treemap__node-inner">
+                    <div
+                      className="treemap__label"
+                      style={{
+                        height: `${padding[0]}px`,
+                        lineHeight: `${padding[0] - 2}px`,
+                        backgroundColor: node.children ? 'rgba(255,255,255,0.3)' : null,
+                        color: chroma(colorScale(i)).darken(2).hex(),
+                      }}
                     >
                       {node.data.key} ({nFormatter(node.value)})
                     </div>
                   </div>
                 </div>
               </div>
-          )}
+            )}
           />
         </div>
       </div>
