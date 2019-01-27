@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
-import { treemap } from 'd3-hierarchy';
+import { treemap, treemapSquarify } from 'd3-hierarchy';
 
 function canDisplay(node) {
   const width = node.x1 - node.x0;
@@ -13,21 +13,25 @@ function canDisplay(node) {
   return true;
 }
 
-function calculatePos(node) {
+function calculatePos(node, transition) {
   return {
     transform: `translate(${node.x0}px, ${node.y0}px)`,
     width: `${node.x1 - node.x0}px`,
     height: `${node.y1 - node.y0}px`,
-    transition: 'all 1s ease',
+    transition,
   };
 }
 
-export default function Treemap({ root, zoomed, width, height, padding, nodeComponent }) {
+export default function Treemap({
+  root, tile, zoomed, width, height, padding, transition, nodeComponent,
+}) {
   root
     .sum(d => d.value)
     .sort((a, b) => b.height - a.height || b.value - a.value);
 
-  treemap().size([width, height])(root);
+  treemap()
+    .tile(tile)
+    .size([width, height])(root);
 
   const zoomedEl = zoomed ? root.descendants().find(node => node.data.key === zoomed) : root;
   if (zoomedEl.depth > 0) {
@@ -80,7 +84,7 @@ export default function Treemap({ root, zoomed, width, height, padding, nodeComp
     .filter(node => canDisplay(node))
     .map((node, i) => (
       <Fragment key={node.data.key + node.depth}>
-        {nodeComponent(node, i, calculatePos(node))}
+        {nodeComponent(node, i, calculatePos(node, transition))}
       </Fragment>
     ));
 }
@@ -92,10 +96,14 @@ Treemap.propTypes = {
   padding: PropTypes.arrayOf(PropTypes.number),
   nodeComponent: PropTypes.func,
   zoomed: PropTypes.string,
+  tile: PropTypes.func.isRequired,
+  transition: PropTypes.string,
 };
 
 Treemap.defaultProps = {
   zoomed: null,
   nodeComponent: (node, i, posStyle) => <div style={{ ...posStyle, position: 'absolute', background: 'rgba(255,0,0,0.1)' }}>{node.data.key}</div>,
   padding: [20, 2, 2, 2],
+  tile: treemapSquarify,
+  transition: null,
 };

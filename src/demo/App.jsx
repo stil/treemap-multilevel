@@ -6,6 +6,7 @@ import React, { Fragment } from 'react';
 import chroma from 'chroma-js';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
+import { treemapBinary, treemapResquarify } from 'd3-hierarchy';
 import Treemap from '../components/Treemap';
 import countryTree from './data/country-tree';
 import './Treemap.css';
@@ -53,7 +54,14 @@ export default class App extends React.Component {
   }
 
   handleClick(node) {
-    this.setState({ zoomed: node.depth === 0 ? null : node.data.key });
+    this.setState((prevState) => {
+      if (node.depth === 0) {
+        return { zoomed: null };
+      }
+      return prevState.zoomed === node.data.key
+        ? { zoomed: node.parent.data.key }
+        : { zoomed: node.data.key };
+    });
   }
 
   render() {
@@ -84,11 +92,13 @@ export default class App extends React.Component {
 
           <div style={{ height: `${size[1]}px`, position: 'relative', overflow: 'hidden', borderRadius: '2px', backgroundClip: 'padding-box' }}>
             <Treemap
+              tile={treemapBinary}
               root={countryTree}
               zoomed={this.state.zoomed}
               width={size[0]}
               height={size[1]}
               padding={padding}
+              transition="all 300ms ease"
               nodeComponent={(node, i, posStyle) => (
                 <div
                   className="treemap__node"
@@ -96,22 +106,16 @@ export default class App extends React.Component {
                     ...posStyle,
                     background: cacheBgColor(countryTree.descendants().findIndex(item => item.data.key === node.data.key)),
                   }}
-                  onClick={() => { if (node.children) this.handleClick(node); }}
                 >
-                  <div className={`treemap__node-outer${node.children ? ' treemap__node-outer--children' : ''}`}>
-                    <div className="treemap__node-inner">
-                      <div
-                        className="treemap__label"
-                        style={{
-                          height: `${padding[0]}px`,
+                  <div
+                    className={`treemap__label${node.children ? ' treemap__label--children' : ''}`}
+                    onClick={() => { if (node.children) this.handleClick(node); }}
+                    style={{
                           lineHeight: `${padding[0] - 2}px`,
-                          backgroundColor: node.children ? 'rgba(255,255,255,0.3)' : null,
                           color: cacheTextColor(countryTree.descendants().findIndex(item => item.data.key === node.data.key)),
                         }}
-                      >
-                        {node.data.key} ({nFormatter(node.value)})
-                      </div>
-                    </div>
+                  >
+                    {node.data.key} ({nFormatter(node.value)})
                   </div>
                 </div>
               )}
