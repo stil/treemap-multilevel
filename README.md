@@ -7,7 +7,7 @@ Multilevel treemap component created with [`D3`](https://d3js.org/) and [`React`
 Example
 -------
 
-This is how components looks like displaying world countries populations on treemap.
+This is how component looks like displaying world countries populations on treemap.
 
 ![screenshot](src/demo/demo.gif)
 
